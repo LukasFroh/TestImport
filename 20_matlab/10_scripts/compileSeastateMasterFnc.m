@@ -10,9 +10,9 @@ close all
 
 %% :::::::::| \/\/\/ Mandatory input below \/\/\/ |:::::::::::::::::::::::::::::::::::::::::::::::::::::::
 % Base path (Path to repository)
-basePath    = '...';
+basePath    = 'C:\Users\LuFI_LF\seadrive_root\froehlin\Meine Bibliotheken\GitLab\Seegangsmodul\';
 % File name of output-file (*.exe)
-outputName  = 'seastateModule_v1_6';
+outputName  = 'seastateModule_v1_7';
 %  :::::::::| /\/\/\ Mandatory input above /\/\/\ |:::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 %% :::::::::| Compilation (no input needed) |:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

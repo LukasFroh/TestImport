@@ -1,3 +1,20 @@
+**Version 1.7**
+
+_Bug fixes:_
+- fixed issue regarding sensor priority in the matlab function _imp_convertAllInsituData2OneTable.m_. Now for all existing sensor 
+of current site the sensor with the nearest valid time index to defined time2Eval is identified and this sensor is used for further
+evaluation. 
+
+**Version 1.6** (2024-09-10)
+
+_New Features:_
+- site connections (necessary for interpolation lines as base for interpolation matrix) can now be defined via .xlsx file.
+ File and documentation can be found here: ...\10_inputFiles\30_siteOverview
+
+_Bug fixes:_
+- Bug fixed regarding sensor priority in the matlab function _imp_convertAllInsituData2OneTable.m_. 
+
+
 **Version 1.5 (2024-04-24)**
 
 _New Features:_

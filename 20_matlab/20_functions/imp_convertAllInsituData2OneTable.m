@@ -1,5 +1,10 @@
 function siteDataOut = imp_convertAllInsituData2OneTable(input,siteDataIn,finalSensorStructName,finalTTName)
 
+% Chosen variable to evaluate
+evalVar = input.var2ScaleInsitu{:};
+% Time2Eval
+t2e = input.time2Eval;
+
 % Identify site names
 if iscell(siteDataIn(1).name)
     sites       = [siteDataIn(:).name];
@@ -12,59 +17,77 @@ siteDataOut             = siteDataIn;
 
 % Loop over all sites
 for iField = 1:numel(sites)
-    
+
     % If finalSensorStructName is no timetable, do sensor priority sorting
     if ~istimetable(siteDataIn(iField).(finalSensorStructName))
-
-        % Initialize validCounter --> 1 for valid data / 0 for no valid data (skip to next sensor)
-        validCounter = 0;
 
         % Get all data names in current final live data struct
         currFields          = fieldnames(siteDataIn(iField).(finalSensorStructName));
 
-        %% ----- If dwrHis data is available and not empty -----
-        if ismember("dwrHIS",currFields)
-            if ~isempty(siteDataIn(iField).(finalSensorStructName).("dwrHIS"))
-                % Set final timetable
-                siteDataOut(iField).(finalTTName)           = siteDataIn(iField).(finalSensorStructName).('dwrHIS');
-                % Set chosenSensor to dwr
-                siteDataOut(iField).('chosenSensor')        = 'dwr';
-                % Set valid counter to true
-                validCounter = 1;
+        % Cell with most current timesteps
+        tsCell = cell(numel(currFields),1);
+
+        for cfi = 1:numel(currFields)
+            currSens = currFields{cfi};
+
+            % Identify corresponding cleaned timetable name
+            if strcmpi(currSens,'dwrHIS')
+                cleanedTableName = 'hisCleaned';
+                currSensInit = 'dwr'; % Sensor name with his/hiw/gps
+            elseif strcmpi(currSens,'dwrHIW')
+                cleanedTableName = 'hiwCleaned';
+                currSensInit = 'dwr'; % Sensor name with his/hiw/gps
+            elseif strcmpi(currSens,'dwrGPS')
+                cleanedTableName = 'cleaned';
+                currSensInit = 'dwr'; % Sensor name with his/hiw/gps
+            else
+                cleanedTableName = 'cleaned';
+                currSensInit = currSens; % Sensor name with his/hiw/gps
             end
+
+            % Identify whether current sensor struct is empty or not
+            if isempty(siteDataIn(iField).(currSensInit).(cleanedTableName))
+                tsCell{cfi} = datetime(NaT,'TimeZone','UTC');
+                continue
+            end
+
+            % Identify last valid non-nan var
+            notNanIdx = find(~isnan(siteDataIn(iField).(currSensInit).(cleanedTableName).(evalVar)));
+            % If valid datapoints are available
+            if ~isempty(notNanIdx) > 1
+                % Find closest timestep to time2eval t2e
+                [~,timeIdx] = min( abs( t2e - siteDataIn(iField).(currSensInit).(cleanedTableName).Time(onlyValidIdx) ) );
+                tsCell{cfi} = siteDataIn(iField).(currSensInit).(cleanedTableName).Time(timeIdx);
+                % If only nan or no datapoints are available
+            else
+                tsCell{cfi} = siteDataIn(iField).(currSensInit).(cleanedTableName).Time(end);
+            end
+
         end
 
-        %% ----- If dwr not valid/available and radac is available and not empty -----
-        if ismember("radac",currFields) && validCounter == 0
-            if ~isempty(siteDataIn(iField).(finalSensorStructName).("radac"))
-                % Set final timetable
-                siteDataOut(iField).(finalTTName)           = siteDataIn(iField).(finalSensorStructName).('radac');
-                % Set chosenSensor to radac
-                siteDataOut(iField).('chosenSensor')        = 'radac';
-                % Set valid counter to true
-                validCounter = 1;
-            end
-        end
-
-        %% ----- If dwr + radac not valid/available and radac single is available and not empty -----
-        if ismember("radacSingle",currFields) && validCounter == 0
-            if ~isempty(siteDataIn(iField).(finalSensorStructName).("radacSingle"))
-                % Set final timetable
-                siteDataOut(iField).(finalTTName)           = siteDataIn(iField).(finalSensorStructName).('radacSingle');
-                % Set chosenSensor to radacSingle
-                siteDataOut(iField).('chosenSensor')        = 'radacSingle';
-                % Set valid counter to true
-                validCounter = 1;
-            end
-        end
-
-        %% ----- If none of dwr, radac or radac single is valid/available -----
-        if validCounter == 0
+        % Identify most recent timestep
+        if all(isnat([tsCell{:}]))
             % No valid sensor available. Create timetable with NaN entry for current timestep and set chosenSensor to none
             nTimesteps                                  = nan(numel(siteDataIn(iField).time),1);
             siteDataOut(iField).(finalTTName)           = timetable(siteDataIn(iField).time,nTimesteps,'VariableNames',{'VHM0'});
             siteDataOut(iField).('chosenSensor')        = 'none';
+        else
+            % Identify sensor to use (most recent time mrt)
+            [~,mrt] = min(abs( t2e - [tsCell{:}] ));
+            finalSensorName = currFields{mrt};
+            if contains(finalSensorName,'dwr')
+                finalChosenSensor = 'dwr';
+            else
+                finalChosenSensor = finalSensorName;
+            end
+
+            % Set final timetable
+            siteDataOut(iField).(finalTTName)           = siteDataIn(iField).(finalSensorStructName).(finalSensorName);
+            % Set chosenSensor to dwr
+            siteDataOut(iField).('chosenSensor')        = finalChosenSensor;
         end
 
     end
+end
+
 end

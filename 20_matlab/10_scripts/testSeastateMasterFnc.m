@@ -1,8 +1,4 @@
-%% ###########################################################################################################################
-%   repository: seastate module
-%   author: ©Lukas Froehling (froehling@lufi.uni-hannover.de)
-%   Test seastateMasterFnc in Matlab 
-%  ###########################################################################################################################
+%% Test seastateMasterFnc in Matlab Application
 
 clear,clc,close all
 restoredefaultpath
@@ -11,31 +7,38 @@ restoredefaultpath
 % Activate ("1") or deactivate ("0") dummy Mode. Input must be given as string!
 dummyBool           = "0";
 
-% Define manual timeshift (one value or multiple values for looping)
-for ti = 48
+tIn = datetime(2022,02,28,06,30,00,'TimeZone','UTC');
 
-    dataPath            = char("{'...'}");
-    headerPath          = char("{'...\10_inputFiles\10_headerFiles\'}");
-    coastlinePath       = char("{'...\10_inputFiles\20_coastlineFiles\'}");
-    siteOverviewPath    = char("{'...\10_inputFiles\30_siteOverview\'}");
-    wamDataPath         = char("{'...'}");
-    logPath             = char("{'...\output\10_logs'}");
-    figPath             = char("{'...\output\20_figures'}");
-    expDataPath         = char("{'...\output\30_data'}");
-    cmPath              = char("{'...\10_inputFiles\40_colormaps'}");
+tOut = datetime(2022,02,28,18,00,00,'TimeZone','UTC');
+
+tNow = datetime('now','TimeZone','UTC');
+
+% Define manual timeshift (one value or multiple values for looping)
+for ti = 24.5
+    % for ti = floor( hours(tNow-tOut) ) : 0.5: ceil( hours(tNow-tIn) )
+
+    dataPath            = char("{'C:\Users\LuFI_LF\OneDrive\LuFI\04_Projekte\03_OpenRAVE\30_Daten\01_ftpBSH_sync\'}");
+    % dataPath            = char("{'C:\Users\LuFI_LF\OneDrive\LuFI\04_Projekte\03_OpenRAVE\30_Daten\00_NewStructure\'}");
+    headerPath          = char("{'C:\Users\LuFI_LF\seadrive_root\froehlin\Meine Bibliotheken\GitLab\Seegangsmodul\10_inputFiles\10_headerFiles\'}");
+    coastlinePath       = char("{'C:\Users\LuFI_LF\seadrive_root\froehlin\Meine Bibliotheken\GitLab\Seegangsmodul\10_inputFiles\20_coastlineFiles\'}");
+    siteOverviewPath    = char("{'C:\Users\LuFI_LF\seadrive_root\froehlin\Meine Bibliotheken\GitLab\Seegangsmodul\10_inputFiles\30_siteOverview\'}");
+    wamDataPath         = char("{'D:\OpenRAVE_DWD_WAM_Forecast\'}");
+    logPath             = char("{'C:\Users\LuFI_LF\seadrive_root\froehlin\Meine Bibliotheken\output_Seegangsmodul\10_logs'}");
+    figPath             = char("{'C:\Users\LuFI_LF\seadrive_root\froehlin\Meine Bibliotheken\output_Seegangsmodul\20_figures'}");
+    expDataPath         = char("{'C:\Users\LuFI_LF\seadrive_root\froehlin\Meine Bibliotheken\output_Seegangsmodul\30_data'}");
+    % figPath             = char("{'C:\Users\LuFI_LF\seadrive_root\Lukas Fr\Meine Bibliotheken\GitLab\vessel_msdv\40_figures\cwamAdjustedOutput'}");
+    % expDataPath         = char("{'C:\Users\LuFI_LF\seadrive_root\Lukas Fr\Meine Bibliotheken\GitLab\vessel_msdv\40_figures\cwamAdjustedOutput'}");
+    cmPath              = char("{'C:\Users\LuFI_LF\seadrive_root\froehlin\Meine Bibliotheken\GitLab\Seegangsmodul\10_inputFiles\40_colormaps'}");
     seastateVars2Eval   = char("{'VHM0'}");
 
     % Change paths for dummy mode
     if strcmp(dummyBool,"1")
-        dataPath        = char("{'...\50_dummyData\20_insitu\'}");
-        wamDataPath     = char("{'...\50_dummyData\10_forecast\'}");
-        logPath         = char("{'...\50_dummyData\30_output\10_logs'}");
-        figPath         = char("{'...\50_dummyData\30_output\20_figures'}");
-        expDataPath     = char("{'...\50_dummyData\30_output\30_data'}");
+        dataPath        = char("{'C:\Users\LuFI_LF\seadrive_root\froehlin\Meine Bibliotheken\GitLab\Seegangsmodul\50_dummyData\20_insitu\'}");
+        wamDataPath     = char("{'C:\Users\LuFI_LF\seadrive_root\froehlin\Meine Bibliotheken\GitLab\Seegangsmodul\50_dummyData\10_forecast\'}");
+        logPath         = char("{'C:\Users\LuFI_LF\seadrive_root\froehlin\Meine Bibliotheken\GitLab\Seegangsmodul\50_dummyData\30_output\10_logs'}");
+        figPath         = char("{'C:\Users\LuFI_LF\seadrive_root\froehlin\Meine Bibliotheken\GitLab\Seegangsmodul\50_dummyData\30_output\20_figures'}");
+        expDataPath     = char("{'C:\Users\LuFI_LF\seadrive_root\froehlin\Meine Bibliotheken\GitLab\Seegangsmodul\50_dummyData\30_output\30_data'}");
     end
-
-    % Add path to functions
-    addpath(genpath('...\20_matlab'))
 
     minQF               = "2";
     wamModel2Eval       = 'cwam';
@@ -90,6 +93,8 @@ for ti = 48
 
 
     %% execution
+    % Add path to functions
+    addpath(genpath('C:\Users\LuFI_LF\seadrive_root\froehlin\Meine Bibliotheken\GitLab\Seegangsmodul\20_matlab'))
 
     % Execution of master function
     seastateMasterFnc(dataPath, headerPath, coastlinePath, wamDataPath, siteOverviewPath, logPath, figPath, expDataPath, cmPath, ... % Path input

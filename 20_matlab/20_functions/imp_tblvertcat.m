@@ -33,9 +33,13 @@ nrowslist = cellfun(@height,tbl); %number of rows for each table
 %% assign temporary ids going from 1 to total # rows among all tables
 tableIDtmp = [0 cumsum(nrowslist)];
 % Initialize datetime vector
-datetimeVec = NaT(sum(nrowslist),1);
+datetimeVec = NaT(sum(nrowslist),1,'TimeZone','UTC');
 
 for n = 1:ntbls
+
+    % Set 'UTC' as timezone for each timetable
+    tbl{n}.Time.TimeZone = 'UTC';
+
     %variable names
     varnames = tbl{n}.Properties.VariableNames;
     %make sure tableID isn't already a variable name
